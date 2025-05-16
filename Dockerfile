@@ -1,14 +1,11 @@
-# Use lightweight JDK base image
-FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jdk-alpine as builder
+RUN mkdir -p /app/source
+COPY . /app/source
+WORKDIR /app/source
+RUN ./mvnw clean package
 
-# Set the working directory in the container
-WORKDIR /app
 
-# Copy the built JAR from host into the image
-COPY target/*.jar app.jar
-
-# Expose the port your app runs on
+FROM builder
+COPY --from=builder /app/source/target/*.jar /app/app.jar
 EXPOSE 8080
-
-# Run the JAR
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]
