@@ -1,19 +1,14 @@
+# Use lightweight JDK base image
 FROM openjdk:8-jdk-alpine
 
-# Install required dependencies (like bash & permissions)
-RUN apk add --no-cache bash
-
-# Create app directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy all files (including .mvn, mvnw, pom.xml, src/)
-COPY . /app
+# Copy the built JAR from host into the image
+COPY target/*.jar app.jar
 
-# Build the app using the Maven wrapper
-RUN chmod +x mvnw && ./mvnw clean package -DskipTests
-
-# Expose app port
+# Expose the port your app runs on
 EXPOSE 8080
 
-# Run the JAR (adjust the JAR name if different)
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/target/app.jar"]
+# Run the JAR
+ENTRYPOINT ["java", "-jar", "app.jar"]
